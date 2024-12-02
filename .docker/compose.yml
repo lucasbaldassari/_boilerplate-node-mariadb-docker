@@ -1,0 +1,40 @@
+services:
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: __CONTAINER_NAME_PREFIX__--server
+    container_name: __CONTAINER_NAME_PREFIX__--server
+    user: 1000:1000
+    tty: true
+    working_dir: /app
+    ports:
+      - __SERVER_PORT_EXTERNAL__:__SERVER_PORT_INTERNAL__
+    volumes:
+      - ../:/app
+    networks:
+      - network
+    depends_on:
+      - database
+
+  database:
+    image: mariadb:11.4.3
+    container_name: __CONTAINER_NAME_PREFIX__--database
+    tty: true
+    volumes:
+      - ./database:/var/lib/mysql
+    ports:
+      - __DATABASE_PORT_EXTERNAL__:__DATABASE_PORT_INTERNAL__
+    networks:
+      - network
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_TCP_PORT: __DATABASE_PORT_INTERNAL__
+      MYSQL_DATABASE: __DATABASE_SCHEMA__
+
+networks:
+
+  network:
+    name: __CONTAINER_NAME_PREFIX__--network
+    driver: bridge
